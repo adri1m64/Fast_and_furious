@@ -1,3 +1,5 @@
+
+# type: ignore
 from matplotlib import pyplot as plt
 import numpy as np
 
@@ -93,31 +95,24 @@ def calcul_ligne_droite(voiture, alpha, longueur,vitesse=0):
             - temps (float): Le temps calculé pour la voiture sur la pente.
             - vitesse (float): La vitesse calculée de la voiture sur la pente.
     """
-    
-    # Calcul de la résistance sur la pente
-    res = g * (np.sin(alpha) - (voiture['mu'] * np.cos(alpha)))
-    # Calcul de la résistance due à l'accélération de la voiture
-    res2 = voiture['accélération'] - (g * np.sin(alpha)) + (voiture['mu'] * g * np.cos(alpha))
-    # Addition des deux résistances
-    res = res + res2
-    # Calcul du temps en fonction de la résistance totale
-    res = (2*longueur) / res
-    res = np.sqrt(res)
-    temps = res
+    # Calcul du temps en fonction de la gravité, de l'angle de la pente, du coefficient de friction et de l'accélération de la voiture
+    temps = g * (np.sin(alpha) - (voiture['mu'] * np.cos(alpha))) + (voiture['accélération'] - (g * np.sin(alpha)) + (voiture['mu'] * g * np.cos(alpha)))
 
-    # Calcul de la force de traction sur la pente
-    res3 = (voiture['masse'] * g * np.sin(alpha)) - (voiture['mu'] * voiture['masse'] * g * np.cos(alpha))
-    # Calcul de la force due à l'accélération de la voiture
-    res4 = voiture['masse'] * (voiture['accélération'] - (g * np.sin(alpha)) + (voiture['mu'] * g * np.cos(alpha)))
-    # Addition des deux forces
-    res3 = res3 + res4
-    # Calcul de l'accélération totale
-    res3 = (1 / voiture['masse']) * res3
-    # Calcul de la vitesse en fonction de l'accélération totale et du temps
-    res3 = res3 * temps
-    vitesse = res3
+    # Ajustement du temps en fonction de la longueur de la pente
+    temps = (2*longueur) / temps
+    temps = np.sqrt(temps)
 
-    return res, vitesse
+    # Calcul de la vitesse en fonction de la masse de la voiture, de la gravité, de l'angle de la pente, du coefficient de friction et de l'accélération
+    vitesse = (voiture['masse'] * g * np.sin(alpha)) - (voiture['mu'] * voiture['masse'] * g * np.cos(alpha)) + (voiture['masse'] * (voiture['accélération'] - (g * np.sin(alpha)) + (voiture['mu'] * g * np.cos(alpha))))
+
+    # Ajustement de la vitesse en fonction de la masse de la voiture
+    vitesse = (1 / voiture['masse']) * vitesse
+
+    # Ajustement de la vitesse en fonction du temps calculé
+    vitesse = vitesse * temps
+
+    # Retourne le temps et la vitesse calculés
+    return temps, vitesse
 
 
 
@@ -134,3 +129,11 @@ def calcul_pente():
     for voiture in voitures:
         print(voiture,calcul_ligne_droite(voitures_data[voiture], alpha_plat, longueur_plat))
 calcul_pente()
+
+
+def main(voiture):
+    #1ère pente
+    calcul_ligne_droite(voitures_data[voiture], alpha_pente, longueur_pente)
+
+    #2nd plat après looping
+    calcul_ligne_droite(voitures_data[voiture], alpha_plat, longueur_plat)
