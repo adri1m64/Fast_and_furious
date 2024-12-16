@@ -170,7 +170,7 @@ def ravin(voiture,vitesse_initiale):
     plt.grid(True)
     plt.show()
     print(liste_x[-1])
-    return len(liste_x) * écart_temps, v_x
+    return len(liste_x) * écart_temps, v_x,x
 
 
 
@@ -200,7 +200,7 @@ def main(voiture):
 
 
     #2nd plat après looping
-    calcul = calcul_ligne_droite(voitures_data[voiture], alpha=alpha_plat, longueur=longueur_plat)
+    calcul = calcul_ligne_droite(voitures_data[voiture], longueur=longueur_plat)
     temps += calcul[0]
     vitesse = calcul[1]
 
@@ -208,6 +208,9 @@ def main(voiture):
     calcul = ravin(voitures_data[voiture],vitesse)
     temps += calcul[0]
     vitesse = calcul[1]
+    longueur_saut = calcul[2]
+    if longueur_saut > longueur_ravin:
+        return "La voiture ne peut pas sauter le ravin"
 
     #Sprint final
 
@@ -216,4 +219,7 @@ def main(voiture):
     vitesse = calcul[1]
 
     return temps, vitesse
+
+for voiture in voitures:
+    print(f"La voiture {voiture} a mis {main(voiture)[0]} secondes pour parcourir le circuit et a atteint une vitesse de {main(voiture)[1]} m/s")
 
