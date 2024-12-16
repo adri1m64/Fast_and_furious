@@ -119,7 +119,7 @@ def calcul_ligne_droite(voiture, alpha, longueur,vitesse=0):
 
 
 def ravin(voiture,vitesse_initiale):
-    écart_temps = 0.001
+    écart_temps = 0.01
     k_x = 0.5 * 1.3 * voiture['cx'] * voiture['largeur'] * voiture['hauteur']
     k_y = 0.5 * 1.3 * voiture['cz'] * voiture['largeur'] * voiture['longueur']
 
@@ -136,21 +136,24 @@ def ravin(voiture,vitesse_initiale):
 
     liste_x.append(x)
     liste_y.append(y)
-
+    x_moins_1 = 0
+    y_moins_1 = hauteur_ravin
     while y >= 0:
-        x_moins_1 = x
+        
         v_x = (x - x_moins_1) / écart_temps
         x = ((-(k_x) * (v_x ** 2))/voiture['masse']*2) * (écart_temps**2) + v_x * écart_temps + x
+        x_moins_1 = x
 
 
-        y_moins_1 = y
+        
         v_y = (y - y_moins_1) / écart_temps
         y = (écart_temps ** 2)/2 * ((-g) + (k_y * (v_y ** 2))/voiture['masse']) + v_y * écart_temps + y
+        y_moins_1 = y
         
 
         liste_x.append(x)
         liste_y.append(y)
-        print(y)
+
 
 
     plt.plot(liste_x, liste_y)
