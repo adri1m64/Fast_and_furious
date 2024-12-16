@@ -123,6 +123,9 @@ def ravin(voiture,vitesse_initiale):
     k_x = 0.5 * 1,3 * voiture['cx'] * voiture['largeur'] * voiture['hauteur']
     k_y = 0.5 * 1,3 * voiture['cz'] * voiture['largeur'] * voiture['hauteur']
 
+    print(k_x)
+    print(k_y)
+
 
     liste_x = []
     liste_y = []
@@ -138,7 +141,7 @@ def ravin(voiture,vitesse_initiale):
 
     while y >= 0:
         x_moins_1 = x
-        x = ((-k_x * (v_x ** 2))/voiture['masse']*2) * (écart_temps**2) + v_x * écart_temps + x
+        x = ((-(k_x) * (v_x ** 2))/voiture['masse']*2) * (écart_temps**2) + v_x * écart_temps + x
         v_x = (x - x_moins_1) / écart_temps
 
         y_moins_1 = y
