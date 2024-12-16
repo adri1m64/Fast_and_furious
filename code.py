@@ -150,6 +150,7 @@ def ravin(voiture,vitesse_initiale):
 
         liste_x.append(x)
         liste_y.append(y)
+        print(y)
 
 
     plt.plot(liste_x, liste_y)
