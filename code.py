@@ -9,6 +9,9 @@ longueur_pente = 31
 alpha_plat = 0
 longueur_plat = 10
 
+hauteur_ravin = 1
+longueur_ravin = 9 
+
 
 g = 9.81
 
@@ -115,20 +118,46 @@ def calcul_ligne_droite(voiture, alpha, longueur,vitesse=0):
     return temps, vitesse
 
 
+def ravin(voiture,vitesse_initiale):
+    écart_temps = 0.001
+    k_x = 0.5 * 1,3 * voiture['cx'] * voiture['largeur'] * voiture['hauteur']
+    k_y = 0.5 * 1,3 * voiture['cz'] * voiture['largeur'] * voiture['hauteur']
 
-def calcul_pente():
 
-    for voiture in voitures:
-        print(voiture,calcul_ligne_droite(voitures_data[voiture], alpha_pente, longueur_pente))
-calcul_pente()
+    liste_x = []
+    liste_y = []
 
-print("\n")
+    x = 0
+    y = 1 
 
-def calcul_pente():
+    v_x = vitesse_initiale
+    v_y = 0
 
-    for voiture in voitures:
-        print(voiture,calcul_ligne_droite(voitures_data[voiture], alpha_plat, longueur_plat))
-calcul_pente()
+    liste_x.append(x)
+    liste_y.append(y)
+
+    while y >= 0:
+        x_moins_1 = x
+        x = ((-k_x * (v_x ** 2))/voiture['masse']*2) * (écart_temps**2) + v_x * écart_temps + x
+        v_x = (x - x_moins_1) / écart_temps
+
+        y_moins_1 = y
+        y = (ecart_temps ** 2)/2 * ((-g) - (k_y * (v_y ** 2))/voiture['masse']) + v_y * écart_temps + y
+        v_y = (y - y_moins_1) / écart_temps
+
+        liste_x.append(x)
+        liste_y.append(y)
+    return liste_x, liste_y
+
+
+
+
+
+
+
+
+
+
 
 
 def main(voiture):
@@ -137,3 +166,5 @@ def main(voiture):
 
     #2nd plat après looping
     calcul_ligne_droite(voitures_data[voiture], alpha_plat, longueur_plat)
+
+print(ravin(voitures_data['Dodge Charger'], 20))
