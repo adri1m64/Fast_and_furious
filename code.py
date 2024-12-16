@@ -150,6 +150,12 @@ def ravin(voiture,vitesse_initiale):
 
         liste_x.append(x)
         liste_y.append(y)
+
+        plt.plot(liste_x, liste_y)
+        plt.xlabel('Distance (m)')
+        plt.ylabel('Hauteur (m)')
+        plt.title('Trajectoire de la voiture dans le ravin')
+        plt.show()
     return liste_x, liste_y
 
 
