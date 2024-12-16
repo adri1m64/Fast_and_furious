@@ -6,11 +6,15 @@ import numpy as np
 alpha_pente = 3.7
 longueur_pente = 31
 
-alpha_plat = 0
-longueur_plat = 10
-
 hauteur_ravin = 1
 longueur_ravin = 9 
+
+longueur_plat = 3
+
+
+longueur_sprint = 10
+
+
 
 
 g = 9.81
@@ -85,7 +89,7 @@ voitures_data = {
 voitures = list(voitures_data.keys())
 
 
-def calcul_ligne_droite(voiture, alpha, longueur,vitesse=0):
+def calcul_ligne_droite(voiture, longueur,alpha=0,vitesse_i=0):
     """
     Calcule le temps et la vitesse d'une voiture sur une pente.
     Args:
@@ -114,12 +118,15 @@ def calcul_ligne_droite(voiture, alpha, longueur,vitesse=0):
     # Ajustement de la vitesse en fonction du temps calculé
     vitesse = vitesse * temps
 
+    #Ajout de la vitesse initiale
+    vitesse += vitesse_i
+
     # Retourne le temps et la vitesse calculés
     return temps, vitesse
 
 
 def ravin(voiture,vitesse_initiale):
-    écart_temps = 0.01
+    écart_temps = 0.001
     k_x = 0.5 * 1.3 * voiture['cx'] * voiture['largeur'] * voiture['hauteur']
     k_y = 0.5 * 1.3 * voiture['cz'] * voiture['largeur'] * voiture['longueur']
 
@@ -140,13 +147,13 @@ def ravin(voiture,vitesse_initiale):
     y_moins_1 = hauteur_ravin
     while y >= 0:
         
-        v_x = (x - x_moins_1) / écart_temps
+        v_x = (-k_x * (v_x ** 2))/voiture['masse'] * écart_temps + v_x
         x = ((-(k_x) * (v_x ** 2))/voiture['masse']*2) * (écart_temps**2) + v_x * écart_temps + x
         x_moins_1 = x
 
 
         
-        v_y = (y - y_moins_1) / écart_temps
+        v_y = ((-g) + ((k_y * (v_y ** 2))/voiture['masse'])) * écart_temps + v_y
         y = (écart_temps ** 2)/2 * ((-g) + (k_y * (v_y ** 2))/voiture['masse']) + v_y * écart_temps + y
         y_moins_1 = y
         
@@ -154,14 +161,15 @@ def ravin(voiture,vitesse_initiale):
         liste_x.append(x)
         liste_y.append(y)
 
-
-
+    print(len(liste_x))
+    print(len(liste_y))
     plt.plot(liste_x, liste_y)
     plt.xlabel('Distance (m)')
     plt.ylabel('Hauteur (m)')
     plt.title(f'Trajectoire de la voiture')
     plt.grid(True)
     plt.show()
+    print(liste_x[-1])
     return len(liste_x) * écart_temps, v_x
 
 
@@ -176,10 +184,36 @@ def ravin(voiture,vitesse_initiale):
 
 
 def main(voiture):
+    temps = 0
     #1ère pente
-    calcul_ligne_droite(voitures_data[voiture], alpha_pente, longueur_pente)
+    calcul = calcul_ligne_droite(voitures_data[voiture], alpha=alpha_pente, longueur=longueur_pente)
+    temps += calcul[0]
+    vitesse = calcul[1]
+
+    #1er plat
+    calcul = calcul_ligne_droite(voitures_data[voiture], longueur=longueur_plat,vitesse_i=vitesse)
+    temps += calcul[0]
+    vitesse = calcul[1]
+
+    
+
+
 
     #2nd plat après looping
-    calcul_ligne_droite(voitures_data[voiture], alpha_plat, longueur_plat)
+    calcul = calcul_ligne_droite(voitures_data[voiture], alpha=alpha_plat, longueur=longueur_plat)
+    temps += calcul[0]
+    vitesse = calcul[1]
 
-print(ravin(voitures_data['Dodge Charger'], 20))
+    #Ravin
+    calcul = ravin(voitures_data[voiture],vitesse)
+    temps += calcul[0]
+    vitesse = calcul[1]
+
+    #Sprint final
+
+    calcul = calcul_ligne_droite(voitures_data[voiture], longueur=longueur_sprint,vitesse_i=vitesse)
+    temps += calcul[0]
+    vitesse = calcul[1]
+
+    return temps, vitesse
+
