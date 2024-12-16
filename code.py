@@ -129,7 +129,7 @@ def ravin(voiture,vitesse_initiale):
     liste_y = []
 
     x = 0
-    y = 1 
+    y = hauteur_ravin 
 
     v_x = vitesse_initiale
     v_y = 0
@@ -139,12 +139,14 @@ def ravin(voiture,vitesse_initiale):
 
     while y >= 0:
         x_moins_1 = x
-        x = ((-(k_x) * (v_x ** 2))/voiture['masse']*2) * (écart_temps**2) + v_x * écart_temps + x
         v_x = (x - x_moins_1) / écart_temps
+        x = ((-(k_x) * (v_x ** 2))/voiture['masse']*2) * (écart_temps**2) + v_x * écart_temps + x
+
 
         y_moins_1 = y
-        y = (écart_temps ** 2)/2 * ((-g) + (k_y * (v_y ** 2))/voiture['masse']) + v_y * écart_temps + y
         v_y = (y - y_moins_1) / écart_temps
+        y = (écart_temps ** 2)/2 * ((-g) + (k_y * (v_y ** 2))/voiture['masse']) + v_y * écart_temps + y
+        
 
         liste_x.append(x)
         liste_y.append(y)
@@ -157,7 +159,7 @@ def ravin(voiture,vitesse_initiale):
     plt.title(f'Trajectoire de la voiture')
     plt.grid(True)
     plt.show()
-    return liste_x, liste_y
+    return len(liste_x) * écart_temps, v_x
 
 
 
