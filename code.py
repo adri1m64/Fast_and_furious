@@ -145,7 +145,7 @@ def ravin(voiture,vitesse_initiale):
         v_x = (x - x_moins_1) / écart_temps
 
         y_moins_1 = y
-        y = (ecart_temps ** 2)/2 * ((-g) - (k_y * (v_y ** 2))/voiture['masse']) + v_y * écart_temps + y
+        y = (écart_temps ** 2)/2 * ((-g) - (k_y * (v_y ** 2))/voiture['masse']) + v_y * écart_temps + y
         v_y = (y - y_moins_1) / écart_temps
 
         liste_x.append(x)
