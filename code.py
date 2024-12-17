@@ -160,9 +160,6 @@ def ravin(voiture,vitesse_initiale):
 
         liste_x.append(x)
         liste_y.append(y)
-
-    print(len(liste_x))
-    print(len(liste_y))
     plt.plot(liste_x, liste_y)
     plt.xlabel('Distance (m)')
     plt.ylabel('Hauteur (m)')
@@ -200,7 +197,7 @@ def main(voiture):
 
 
     #2nd plat après looping
-    calcul = calcul_ligne_droite(voitures_data[voiture], longueur=longueur_plat)
+    calcul = calcul_ligne_droite(voitures_data[voiture], longueur=longueur_plat, vitesse_i=vitesse)
     temps += calcul[0]
     vitesse = calcul[1]
 
