@@ -2,6 +2,13 @@
 # type: ignore
 from matplotlib import pyplot as plt
 import numpy as np
+parties = ["pente", "plat", "looping", "plat", "sprint"]
+
+
+
+
+
+afficher_graphique = True
 
 alpha_pente = 3.7
 longueur_pente = 31
@@ -9,7 +16,7 @@ longueur_pente = 31
 hauteur_ravin = 1
 longueur_ravin = 9 
 
-longueur_plat = 3
+longueur_plat = 6
 
 
 longueur_sprint = 10
@@ -89,48 +96,48 @@ voitures_data = {
 voitures = list(voitures_data.keys())
 
 
-def calcul_ligne_droite(voiture, longueur,alpha=0,vitesse_i=0):
-    """
-    Calcule le temps et la vitesse d'une voiture sur une pente.
-    Args:
-        voiture (dict): Un dictionnaire contenant les caractéristiques de la voiture.
-            - 'mu' (float): Le coefficient de friction de la voiture.
-            - 'accélération' (float): L'accélération de la voiture.
-            - 'masse' (float): La masse de la voiture.
-    Returns:
-        tuple: Un tuple contenant:
-            - temps (float): Le temps calculé pour la voiture sur la pente.
-            - vitesse (float): La vitesse calculée de la voiture sur la pente.
-    """
-    # Calcul du temps en fonction de la gravité, de l'angle de la pente, du coefficient de friction et de l'accélération de la voiture
-    temps = g * (np.sin(alpha) - (voiture['mu'] * np.cos(alpha))) + (voiture['accélération'] - (g * np.sin(alpha)) + (voiture['mu'] * g * np.cos(alpha)))
+def calcul_ligne_droite(voiture, longueur,alpha=0,vitesse_i=0,nitro=False):
+    if nitro:
+        acceleration = voiture["accélération"]
+    else:
+        acceleration = voiture["accélération"]
+    delta = 0.001
+    k = 0.5 * 1.3 * voiture["hauteur"] * voiture["largeur"] * voiture["cx"]
+    x=0
+    temps = 0
+    vitesse = vitesse_i
 
-    # Ajustement du temps en fonction de la longueur de la pente
-    temps = (2*longueur) / temps
-    temps = np.sqrt(temps)
-
-    # Calcul de la vitesse en fonction de la masse de la voiture, de la gravité, de l'angle de la pente, du coefficient de friction et de l'accélération
-    vitesse = (voiture['masse'] * g * np.sin(alpha)) - (voiture['mu'] * voiture['masse'] * g * np.cos(alpha)) + (voiture['masse'] * (voiture['accélération'] - (g * np.sin(alpha)) + (voiture['mu'] * g * np.cos(alpha))))
-
-    # Ajustement de la vitesse en fonction de la masse de la voiture
-    vitesse = (1 / voiture['masse']) * vitesse
-
-    # Ajustement de la vitesse en fonction du temps calculé
-    vitesse = vitesse * temps
-
-    #Ajout de la vitesse initiale
-    vitesse += vitesse_i
-
-    # Retourne le temps et la vitesse calculés
+    while x<longueur:
+        vitesse = ((g * np.sin(np.radians(alpha)))+ acceleration - ((voiture["mu"]*g*np.cos(np.radians(alpha)))) - ((k * (vitesse ** 2)) / voiture["masse"])) * delta + vitesse
+        x = 0.5 * ((g * np.sin(np.radians(alpha)))+ acceleration - ((voiture["mu"]*g*np.cos(np.radians(alpha)))) - ((k * (vitesse ** 2)) / voiture["masse"])) * (delta ** 2) + (vitesse * delta) + x
+        temps += delta
     return temps, vitesse
+
+
+def looping(voiture, rayon, vitesse_i,nitro=False):
+    if nitro:
+        acceleration = voiture["accélération"] * 1.3
+    else:
+        acceleration = voiture["accélération"]
+    delta = 0.001
+    w = vitesse_i * rayon
+    theta = 0
+    temps = 0
+    k = 0.5 * 1.3 * voiture["hauteur"] * voiture["largeur"] * voiture["cx"]
+
+    while theta < 360:
+        w = (((acceleration) - (g * np.sin(theta)) - (voiture["mu"] * g * np.cos(theta)) - ((k/voiture["masse"]) * rayon * voiture["mu"])* w ** 2)/rayon * delta + w) 
+        theta = (((acceleration) - (g * np.sin(theta)) - (voiture["mu"] * g * np.cos(theta)) - ((k/voiture["masse"]) * rayon * voiture["mu"]) * w ** 2)/rayon) * (delta ** 2) +( w * delta) + theta
+        temps += delta
+
+
+    return temps, w/ rayon
 
 
 def ravin(voiture,vitesse_initiale):
     écart_temps = 0.001
     k_x = 0.5 * 1.3 * voiture['cx'] * voiture['largeur'] * voiture['hauteur']
     k_y = 0.5 * 1.3 * voiture['cz'] * voiture['largeur'] * voiture['longueur']
-
-
 
     liste_x = []
     liste_y = []
@@ -147,76 +154,85 @@ def ravin(voiture,vitesse_initiale):
     y_moins_1 = hauteur_ravin
     while y >= 0:
         
-        v_x = (-k_x * (v_x ** 2))/voiture['masse'] * écart_temps + v_x
-        x = ((-(k_x) * (v_x ** 2))/voiture['masse']*2) * (écart_temps**2) + v_x * écart_temps + x
-        x_moins_1 = x
-
+        v_x = ((-k_x * (v_x ** 2))/voiture['masse']) * écart_temps + v_x
+        x = 0.5 * ((-k_x * (v_x ** 2))/voiture['masse']) * (écart_temps ** 2) +(v_x * écart_temps) + x
 
         
         v_y = ((-g) + ((k_y * (v_y ** 2))/voiture['masse'])) * écart_temps + v_y
-        y = (écart_temps ** 2)/2 * ((-g) + (k_y * (v_y ** 2))/voiture['masse']) + v_y * écart_temps + y
-        y_moins_1 = y
-        
+        y = 0.5*((-g) + (k_y * (v_y ** 2))/voiture['masse']) * (écart_temps ** 2) + v_y * écart_temps + y        
 
         liste_x.append(x)
         liste_y.append(y)
-    plt.plot(liste_x, liste_y)
-    plt.xlabel('Distance (m)')
-    plt.ylabel('Hauteur (m)')
-    plt.title(f'Trajectoire de la voiture')
-    plt.grid(True)
-    plt.show()
-    print(liste_x[-1])
-    return len(liste_x) * écart_temps, v_x,x
+        if afficher_graphique:
+            plt.plot(liste_x, liste_y)
+            plt.xlabel('Distance (m)')
+            plt.ylabel('Hauteur (m)')
+            plt.title(f'Trajectoire de la voiture')
+            plt.grid(True)
+            plt.show()
+    return len(liste_x) * écart_temps, v_x, x
 
+def main(voiture_nom, partie_nitro):
+    nitro1, nitro2 , nitro3, nitro4, nitro5 = False, False, False, False, False
+    match partie_nitro:
+        case "pente":
+            nitro1 = True
+        case "plat":
+            nitro2 = True
+        case "looping":
+            nitro3 = True
+        case "plat":
+            nitro4 = True
+        case "sprint":
+            nitro5 = True
 
-
-
-
-
-
-
-
-
-
-
-def main(voiture):
     temps = 0
     #1ère pente
-    calcul = calcul_ligne_droite(voitures_data[voiture], alpha=alpha_pente, longueur=longueur_pente)
+    calcul = calcul_ligne_droite(voitures_data[voiture_nom], alpha=alpha_pente, longueur=longueur_pente, nitro=nitro1)
     temps += calcul[0]
     vitesse = calcul[1]
+
 
     #1er plat
-    calcul = calcul_ligne_droite(voitures_data[voiture], longueur=longueur_plat,vitesse_i=vitesse)
+    calcul = calcul_ligne_droite(voitures_data[voiture_nom], longueur=longueur_plat,vitesse_i=vitesse, nitro=nitro2)
     temps += calcul[0]
     vitesse = calcul[1]
 
-    
-
-
+    #Looping
+    calcul = looping(voitures_data[voiture_nom], rayon=6, vitesse_i=vitesse, nitro=nitro3)
+    temps += calcul[0]
+    vitesse = calcul[1]
 
     #2nd plat après looping
-    calcul = calcul_ligne_droite(voitures_data[voiture], longueur=longueur_plat, vitesse_i=vitesse)
+    calcul = calcul_ligne_droite(voitures_data[voiture_nom], longueur=longueur_plat,vitesse_i=vitesse, nitro=nitro4)
     temps += calcul[0]
     vitesse = calcul[1]
 
     #Ravin
-    calcul = ravin(voitures_data[voiture],vitesse)
+    calcul = ravin(voitures_data[voiture_nom],vitesse)
     temps += calcul[0]
     vitesse = calcul[1]
     longueur_saut = calcul[2]
-    if longueur_saut > longueur_ravin:
-        return "La voiture ne peut pas sauter le ravin"
+    if longueur_saut < longueur_ravin:
+        return 0
 
     #Sprint final
 
-    calcul = calcul_ligne_droite(voitures_data[voiture], longueur=longueur_sprint,vitesse_i=vitesse)
+    calcul = calcul_ligne_droite(voitures_data[voiture_nom], longueur=longueur_sprint,vitesse_i=vitesse, nitro=nitro5)
     temps += calcul[0]
     vitesse = calcul[1]
 
     return temps, vitesse
 
-for voiture in voitures:
-    print(f"La voiture {voiture} a mis {main(voiture)[0]} secondes pour parcourir le circuit et a atteint une vitesse de {main(voiture)[1]} m/s")
+
+
+for partie in parties:
+    afficher_graphique = False
+    print(f"Nitro mise sur: {partie}")
+    for voiture in voitures:
+        res = main(voiture, partie)
+        if res == 0:
+            print(f"La voiture {voiture} n'a pas réussi à sauter le ravin")
+        else:
+            print(f"La voiture {voiture} a mis {round(res[0],1)} secondes pour parcourir le circuit et a atteint une vitesse de {round(res[1],1)} m/s")
 
