@@ -125,9 +125,6 @@ def looping(voiture, rayon, vitesse_i):
         liste_x.append(temps)
         liste_y.append(w)
 
-        if w < vminhaut:
-            return 1
-
 
     if afficher_graphique:
         plt.plot(liste_x, liste_y)
@@ -192,11 +189,9 @@ def main(voiture_nom,):
 
     #Looping
     calcul = looping(voitures_data[voiture_nom], rayon=6, vitesse_i=vitesse)
-    if calcul == 1:
-        return 1
-    else:
-        temps += calcul[0]
-        vitesse = calcul[1]
+
+    temps += calcul[0]
+    vitesse = calcul[1]
 
     #Ravin
     calcul = ravin(voitures_data[voiture_nom],vitesse)
@@ -226,8 +221,6 @@ def globale():
         res = main(voiture)
         if res == 0:
             print(f"La voiture {voiture} n'a pas réussi à sauter le ravin")
-        if res == 1:
-            print(f"La voiture {voiture} n'a pas réussi à monter le looping")
         else:
             print(f"La voiture {voiture} a mis {round(res[0],1)} secondes pour parcourir le circuit et a atteint une vitesse de {round(res[1],1)} m/s")
 
