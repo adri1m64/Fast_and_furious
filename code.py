@@ -2,12 +2,6 @@
 # type: ignore
 from matplotlib import pyplot as plt
 import numpy as np
-import easygui
-parties = ["pente", "plat", "looping", "plat", "sprint"]
-
-
-
-
 
 afficher_graphique = True
 
@@ -19,15 +13,9 @@ longueur_ravin = 9
 
 longueur_plat = 6
 
-
 longueur_sprint = 10
 
-
-
-
 g = 9.81
-
-
 
 voitures_data = {
     'Dodge Charger': {
@@ -80,7 +68,6 @@ voitures_data = {
         'cz': 0.3,
         'mu': 0.1
     },
-
 'Mitsubishi Lancer': {
         'masse': 1600,
         'accélération': 5,
@@ -97,11 +84,11 @@ voitures_data = {
 voitures = list(voitures_data.keys())
 
 
-def calcul_ligne_droite(voiture, longueur,alpha=0,vitesse_i=0,nitro=False):
-    if nitro:
-        acceleration = voiture["accélération"]
-    else:
-        acceleration = voiture["accélération"]
+def calcul_ligne_droite(voiture, longueur,alpha=0,vitesse_i=0):
+    
+    acceleration = voiture["accélération"]
+
+
     delta = 0.001
     k = 0.5 * 1.3 * voiture["hauteur"] * voiture["largeur"] * voiture["cx"]
     x=0
@@ -109,21 +96,19 @@ def calcul_ligne_droite(voiture, longueur,alpha=0,vitesse_i=0,nitro=False):
     vitesse = vitesse_i
 
     while x<longueur:
-        vitesse = ((g * np.sin(np.radians(alpha)))+ acceleration - ((voiture["mu"]*g*np.cos(np.radians(alpha)))) - ((k * (vitesse ** 2)) / voiture["masse"])) * delta + vitesse
-        x = 0.5 * ((g * np.sin(np.radians(alpha)))+ acceleration - ((voiture["mu"]*g*np.cos(np.radians(alpha)))) - ((k * (vitesse ** 2)) / voiture["masse"])) * (delta ** 2) + (vitesse * delta) + x
+        vitesse = ((g * np.sin(np.radians(alpha))) + acceleration - ((voiture["mu"]*g*np.cos(np.radians(alpha)))) - ((k * (vitesse ** 2)) / voiture["masse"])) * delta + vitesse
+        x = 0.5 * ((g * np.sin(np.radians(alpha))) + acceleration - ((voiture["mu"]*g*np.cos(np.radians(alpha)))) - ((k * (vitesse ** 2)) / voiture["masse"])) * (delta ** 2) + (vitesse * delta) + x
         temps += delta
     return temps, vitesse
 
 
-def looping(voiture, rayon, vitesse_i,nitro=False):
-    if nitro:
-        acceleration = voiture["accélération"] * 1.3
-    else:
-        acceleration = voiture["accélération"]
+def looping(voiture, rayon, vitesse_i):
+    
+    acceleration = voiture["accélération"]
     delta = 0.001
     w = vitesse_i / rayon
     print(vitesse_i)
-    theta = (-np.pi/2)
+    theta = -np.pi/2
     temps = 0
     k = 0.5 * 1.3 * voiture["hauteur"] * voiture["largeur"] * voiture["cx"]
     liste_x = []
@@ -143,7 +128,7 @@ def looping(voiture, rayon, vitesse_i,nitro=False):
         plt.plot(liste_x, liste_y)
         plt.xlabel('Temps (s)')
         plt.ylabel('Vitesse angulaire (deg/s)')
-        plt.title(f'Vitesse angulaire en fonction du temps')
+        plt.title(f'Vitesse angulaire en fonction du temps de la voiture {nom}')
         plt.grid(True)
         plt.show()
 
@@ -185,46 +170,22 @@ def ravin(voiture,vitesse_initiale):
         plt.plot(liste_x, liste_y)
         plt.xlabel('Distance (m)')
         plt.ylabel('Hauteur (m)')
-        plt.title(f'Trajectoire de la voiture')
+        plt.title(f'Trajectoire de la voiture{nom}')
         plt.grid(True)
         plt.show()
     return len(liste_x) * écart_temps, v_x, x
 
-def main(voiture_nom, partie_nitro=None):
-
-    nitro1, nitro2 , nitro3, nitro4, nitro5 = False, False, False, False, False
-    match partie_nitro:
-        case "pente":
-            nitro1 = True
-        case "plat":
-            nitro2 = True
-        case "looping":
-            nitro3 = True
-        case "plat":
-            nitro4 = True
-        case "sprint":
-            nitro5 = True
+def main(voiture_nom,):
 
 
     temps = 0
     #1ère pente
-    calcul = calcul_ligne_droite(voitures_data[voiture_nom], alpha=alpha_pente, longueur=longueur_pente, nitro=nitro1)
-    temps += calcul[0]
-    vitesse = calcul[1]
-
-
-    #1er plat
-    calcul = calcul_ligne_droite(voitures_data[voiture_nom], longueur=longueur_plat,vitesse_i=vitesse, nitro=nitro2)
+    calcul = calcul_ligne_droite(voitures_data[voiture_nom], alpha=alpha_pente, longueur=longueur_pente)
     temps += calcul[0]
     vitesse = calcul[1]
 
     #Looping
-    calcul = looping(voitures_data[voiture_nom], rayon=6, vitesse_i=vitesse, nitro=nitro3)
-    temps += calcul[0]
-    vitesse = calcul[1]
-
-    #2nd plat après looping
-    calcul = calcul_ligne_droite(voitures_data[voiture_nom], longueur=longueur_plat,vitesse_i=vitesse, nitro=nitro4)
+    calcul = looping(voitures_data[voiture_nom], rayon=6, vitesse_i=vitesse)
     temps += calcul[0]
     vitesse = calcul[1]
 
@@ -237,39 +198,26 @@ def main(voiture_nom, partie_nitro=None):
         return 0
 
     #Sprint final
-
-    calcul = calcul_ligne_droite(voitures_data[voiture_nom], longueur=longueur_sprint,vitesse_i=vitesse, nitro=nitro5)
+    calcul = calcul_ligne_droite(voitures_data[voiture_nom], longueur=longueur_sprint,vitesse_i=vitesse)
     temps += calcul[0]
     vitesse = calcul[1]
+
 
     return temps, vitesse
 
 
+
+
+
 def globale():
     afficher_graphique = False
-    for partie in parties:
-        print(f"Nitro mise sur: {partie}")
-        for voiture in voitures:
-            res = main(voiture, partie)
-            if res == 0:
-                print(f"La voiture {voiture} n'a pas réussi à sauter le ravin")
-            else:
-                print(f"La voiture {voiture} a mis {round(res[0],1)} secondes pour parcourir le circuit et a atteint une vitesse de {round(res[1],1)} m/s")
-
-
-def interactif():
-    afficher_graphique = True
-    user_choice = easygui.choicebox("Choisissez une voiture:", "Voiture:", voitures)
-    res = main(user_choice, easygui.choicebox("Choisissez une nitro:", "Nitro:", parties))
-
-
-def globale_sans_nitro():
-    afficher_graphique = False
     for voiture in voitures:
+        global nom
+        nom = voiture
         res = main(voiture)
         if res == 0:
             print(f"La voiture {voiture} n'a pas réussi à sauter le ravin")
         else:
             print(f"La voiture {voiture} a mis {round(res[0],1)} secondes pour parcourir le circuit et a atteint une vitesse de {round(res[1],1)} m/s")
 
-globale_sans_nitro()
+globale()
