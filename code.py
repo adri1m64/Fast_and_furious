@@ -107,7 +107,6 @@ def looping(voiture, rayon, vitesse_i):
     acceleration = voiture["accélération"]
     delta = 0.001
     w = vitesse_i / rayon
-    print(vitesse_i)
     theta = -np.pi/2
     temps = 0
     k = 0.5 * 1.3 * voiture["hauteur"] * voiture["largeur"] * voiture["cx"]
@@ -116,6 +115,7 @@ def looping(voiture, rayon, vitesse_i):
 
     liste_x.append(0)
     liste_y.append(w)
+    vminhaut = np.sqrt(g*rayon)
 
     while theta < 2 * np.pi:
         w = (((acceleration) - (g * np.sin(theta)) - (voiture["mu"] * g * np.cos(theta)) - ((k/voiture["masse"]) + (rayon * voiture["mu"]))* w ** 2)/rayon * delta + w) 
@@ -124,6 +124,11 @@ def looping(voiture, rayon, vitesse_i):
 
         liste_x.append(temps)
         liste_y.append(w)
+
+        if w < vminhaut:
+            return 1
+
+
     if afficher_graphique:
         plt.plot(liste_x, liste_y)
         plt.xlabel('Temps (s)')
@@ -132,7 +137,6 @@ def looping(voiture, rayon, vitesse_i):
         plt.grid(True)
         plt.show()
 
-    print(w*rayon)
 
     return temps, w* rayon
 
@@ -173,6 +177,7 @@ def ravin(voiture,vitesse_initiale):
         plt.title(f'Trajectoire de la voiture{nom}')
         plt.grid(True)
         plt.show()
+        print("La voiture atterit à une distance de", x, "mètres")
     return len(liste_x) * écart_temps, v_x, x
 
 def main(voiture_nom,):
@@ -183,11 +188,15 @@ def main(voiture_nom,):
     calcul = calcul_ligne_droite(voitures_data[voiture_nom], alpha=alpha_pente, longueur=longueur_pente)
     temps += calcul[0]
     vitesse = calcul[1]
+    print(vitesse)
 
     #Looping
     calcul = looping(voitures_data[voiture_nom], rayon=6, vitesse_i=vitesse)
-    temps += calcul[0]
-    vitesse = calcul[1]
+    if calcul == 1:
+        return 1
+    else:
+        temps += calcul[0]
+        vitesse = calcul[1]
 
     #Ravin
     calcul = ravin(voitures_data[voiture_nom],vitesse)
@@ -217,6 +226,8 @@ def globale():
         res = main(voiture)
         if res == 0:
             print(f"La voiture {voiture} n'a pas réussi à sauter le ravin")
+        if res == 1:
+            print(f"La voiture {voiture} n'a pas réussi à monter le looping")
         else:
             print(f"La voiture {voiture} a mis {round(res[0],1)} secondes pour parcourir le circuit et a atteint une vitesse de {round(res[1],1)} m/s")
 
