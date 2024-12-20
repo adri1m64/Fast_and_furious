@@ -2,6 +2,7 @@
 # type: ignore
 from matplotlib import pyplot as plt
 import numpy as np
+import easygui
 parties = ["pente", "plat", "looping", "plat", "sprint"]
 
 
@@ -120,18 +121,35 @@ def looping(voiture, rayon, vitesse_i,nitro=False):
     else:
         acceleration = voiture["accélération"]
     delta = 0.001
-    w = vitesse_i * rayon
-    theta = 0
+    w = vitesse_i / rayon
+    print(vitesse_i)
+    theta = (-np.pi/2)
     temps = 0
     k = 0.5 * 1.3 * voiture["hauteur"] * voiture["largeur"] * voiture["cx"]
+    liste_x = []
+    liste_y = []
 
-    while theta < 360:
-        w = (((acceleration) - (g * np.sin(theta)) - (voiture["mu"] * g * np.cos(theta)) - ((k/voiture["masse"]) * rayon * voiture["mu"])* w ** 2)/rayon * delta + w) 
-        theta = (((acceleration) - (g * np.sin(theta)) - (voiture["mu"] * g * np.cos(theta)) - ((k/voiture["masse"]) * rayon * voiture["mu"]) * w ** 2)/rayon) * (delta ** 2) +( w * delta) + theta
+    liste_x.append(0)
+    liste_y.append(w)
+
+    while theta < 2 * np.pi:
+        w = (((acceleration) - (g * np.sin(theta)) - (voiture["mu"] * g * np.cos(theta)) - ((k/voiture["masse"]) + (rayon * voiture["mu"]))* w ** 2)/rayon * delta + w) 
+        theta = (((acceleration) - (g * np.sin(theta)) - (voiture["mu"] * g * np.cos(theta)) - ((k/voiture["masse"]) + (rayon * voiture["mu"])) * w ** 2)/rayon) * ((delta ** 2)/2) +( w * delta) + theta
         temps += delta
 
+        liste_x.append(temps)
+        liste_y.append(w)
+    if afficher_graphique:
+        plt.plot(liste_x, liste_y)
+        plt.xlabel('Temps (s)')
+        plt.ylabel('Vitesse angulaire (deg/s)')
+        plt.title(f'Vitesse angulaire en fonction du temps')
+        plt.grid(True)
+        plt.show()
 
-    return temps, w/ rayon
+    print(w*rayon)
+
+    return temps, w* rayon
 
 
 def ravin(voiture,vitesse_initiale):
@@ -163,16 +181,17 @@ def ravin(voiture,vitesse_initiale):
 
         liste_x.append(x)
         liste_y.append(y)
-        if afficher_graphique:
-            plt.plot(liste_x, liste_y)
-            plt.xlabel('Distance (m)')
-            plt.ylabel('Hauteur (m)')
-            plt.title(f'Trajectoire de la voiture')
-            plt.grid(True)
-            plt.show()
+    if afficher_graphique:
+        plt.plot(liste_x, liste_y)
+        plt.xlabel('Distance (m)')
+        plt.ylabel('Hauteur (m)')
+        plt.title(f'Trajectoire de la voiture')
+        plt.grid(True)
+        plt.show()
     return len(liste_x) * écart_temps, v_x, x
 
-def main(voiture_nom, partie_nitro):
+def main(voiture_nom, partie_nitro=None):
+
     nitro1, nitro2 , nitro3, nitro4, nitro5 = False, False, False, False, False
     match partie_nitro:
         case "pente":
@@ -185,6 +204,7 @@ def main(voiture_nom, partie_nitro):
             nitro4 = True
         case "sprint":
             nitro5 = True
+
 
     temps = 0
     #1ère pente
@@ -225,14 +245,31 @@ def main(voiture_nom, partie_nitro):
     return temps, vitesse
 
 
-
-for partie in parties:
+def globale():
     afficher_graphique = False
-    print(f"Nitro mise sur: {partie}")
+    for partie in parties:
+        print(f"Nitro mise sur: {partie}")
+        for voiture in voitures:
+            res = main(voiture, partie)
+            if res == 0:
+                print(f"La voiture {voiture} n'a pas réussi à sauter le ravin")
+            else:
+                print(f"La voiture {voiture} a mis {round(res[0],1)} secondes pour parcourir le circuit et a atteint une vitesse de {round(res[1],1)} m/s")
+
+
+def interactif():
+    afficher_graphique = True
+    user_choice = easygui.choicebox("Choisissez une voiture:", "Voiture:", voitures)
+    res = main(user_choice, easygui.choicebox("Choisissez une nitro:", "Nitro:", parties))
+
+
+def globale_sans_nitro():
+    afficher_graphique = False
     for voiture in voitures:
-        res = main(voiture, partie)
+        res = main(voiture)
         if res == 0:
             print(f"La voiture {voiture} n'a pas réussi à sauter le ravin")
         else:
             print(f"La voiture {voiture} a mis {round(res[0],1)} secondes pour parcourir le circuit et a atteint une vitesse de {round(res[1],1)} m/s")
 
+globale_sans_nitro()
